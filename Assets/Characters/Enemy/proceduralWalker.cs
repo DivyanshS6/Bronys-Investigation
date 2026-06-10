@@ -6,6 +6,11 @@ public class proceduralWalker : MonoBehaviour
     [Header("IK Targets")]
     public Transform leftFootTarget;
     public Transform rightFootTarget;
+    // New glitch variables added right below your original ones
+    public Transform glitchLeftTarget;  // Spine
+    public Transform glitchRightTarget; // Spine1
+    [HideInInspector]
+    public bool useGlitchTargets = false;
 
     [Header("Walk Settings")]
     public float stepDistance = 0.4f; // How far the feet move forward/back
@@ -25,8 +30,8 @@ public class proceduralWalker : MonoBehaviour
         agent = GetComponentInParent<NavMeshAgent>();
 
         // save the original spot u put them in editor so we can move RELATIVE to this
-        leftFootHome = leftFootTarget.localPosition;
-        rightFootHome = rightFootTarget.localPosition;
+        if (leftFootTarget != null) leftFootHome = leftFootTarget.localPosition;
+        if (rightFootTarget != null) rightFootHome = rightFootTarget.localPosition;
     }
 
     void Update()
@@ -48,10 +53,14 @@ public class proceduralWalker : MonoBehaviour
             float rZ = Mathf.Sin(walkCycle + Mathf.PI) * stepDistance;
             float rY = Mathf.Max(0, Mathf.Cos(walkCycle + Mathf.PI)) * stepHeight;
 
+            // Decides WHICH targets to manipulate based on the switch
+            Transform currentLeft = useGlitchTargets ? glitchLeftTarget : leftFootTarget;
+            Transform currentRight = useGlitchTargets ? glitchRightTarget : rightFootTarget;
+
             // we add the math to the Home position
             // this stops the "teleport to hips" bug because it keeps the original height/width
-            leftFootTarget.localPosition = leftFootHome + new Vector3(0, lY, lZ);
-            rightFootTarget.localPosition = rightFootHome + new Vector3(0, rY, rZ);
+            if (currentLeft != null) currentLeft.localPosition = leftFootHome + new Vector3(0, lY, lZ);
+            if (currentRight != null) currentRight.localPosition = rightFootHome + new Vector3(0, rY, rZ);
         }
     }
 }
